@@ -108,7 +108,7 @@ char* alloc::chunk_alloc(size_t bytes, int& nobjs){
         start_free = (char*) malloc(bytes_to_get);
         if(!start_free) {
             obj ** my_free_list = 0,*p = 0;
-            for(int i=0; i<__MAX_BYTES;i+=__ALIGN) {
+            for(int i= bytes; i<__MAX_BYTES;i+=__ALIGN) {
                 my_free_list = free_lists + FREELIST_INDEX(i);
                 p = *my_free_list;
                 if (0 != p) {

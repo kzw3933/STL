@@ -5,7 +5,7 @@
 #include <GG_type_traits.h>
 #include <GG_iterator.h>
 #include <GG_construct.h>
-#include <GG_algorithm.h>
+#include <GG_algobase.h>
 
 __GG_BEGIN_NAMESPACE
 

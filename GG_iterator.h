@@ -115,18 +115,37 @@ iterator_category(const Iterator&){
     return category();
 }
 
-// 方便获得某个迭代器的distance type
+// 方便获得某个迭代器的value type
 template <class Iterator>
 inline typename iterator_traits<Iterator>::value_type*
 value_type(const Iterator&){
     return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
 }
 
-// 方便获得某个迭代器的value type
+
+// 方便获得某个迭代器的distance type
 template <class Iterator>
 inline typename iterator_traits<Iterator>::difference_type*
-difference_type(const Iterator&){
+distance_type(const Iterator&){
     return static_cast<typename iterator_traits<Iterator>::difference_type*>(0);
+}
+
+template <class InputIterator, class Distance>
+inline void __distance(InputIterator first, InputIterator last, Distance& n, input_iterator_tag) {
+	while (first != last) {
+		++first;
+		++n;
+	}
+}
+
+template <class RandomAccessIterator, class Distance>
+inline void __distance(RandomAccessIterator first, RandomAccessIterator last, Distance& n, random_access_iterator_tag) {
+	n += last - first;
+}
+
+template <class InputIterator, class Distance>
+inline void distance(InputIterator first, InputIterator last, Distance& n ){
+	__distance(first, last, n, iterator_category(first));
 }
 
 __GG_END_NAMESPACE

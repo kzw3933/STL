@@ -49,7 +49,7 @@ class vector {
        
         iterator begin() {  return start;}
         const_iterator begin() const { return start; }
-        iterator end() { return finish;}
+        iterator end() { return finish; }
         const_iterator end() { return finish; }
         size_type size() const {  return size_type(end()-begin());}
         size_type capacity() const {  return size_type(end_of_storage - begin()); }
@@ -199,6 +199,7 @@ void vector<T, Alloc>::insert_aux(iterator pos, const T& x){
         copy_backward(pos, finish -2, finish-1);
         *position = x_copy;
     }
+    
     else {
         const size_type old_sz = size();
         const size_type len = old_sz != 0 ? 2*old_sz : 1;

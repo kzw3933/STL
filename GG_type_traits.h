@@ -1,7 +1,7 @@
 #ifndef __GG_TYPE_TRAITS_H
 #define __GG_TYPE_TRAITS_H
 
-#include <GG_config.h>
+#include "GG_config.h"
 
 __GG_BEGIN_NAMESPACE
 

@@ -2,12 +2,12 @@
 #define __GG_VECTOR_H
 
 #include <stddef.h>
-#include <GG_config.h>
-#include <GG_allocator.h>
-#include <GG_alloc.h>
-#include <GG_construct.h>
-#include <GG_uninitialized.h>
-#include <GG_algobase.h>
+#include "GG_config.h"
+#include "GG_allocator.h"
+#include "GG_alloc.h"
+#include "GG_construct.h"
+#include "GG_uninitialized.h"
+#include "GG_algobase.h"
 
 __GG_BEGIN_NAMESPACE
 
@@ -48,24 +48,24 @@ class vector {
     public:
        
         iterator begin() {  return start;}
-        const_iterator begin() const { return start; }
+        // const_iterator begin() const { return start; }
         iterator end() { return finish; }
-        const_iterator end() { return finish; }
+        // const_iterator end() { return finish; }
         size_type size() const {  return size_type(end()-begin());}
         size_type capacity() const {  return size_type(end_of_storage - begin()); }
         bool empty() const {  return begin() == end(); }
         reference operator[] (size_type n){ 
             return *(begin()+n);
         } 
-        const_reference operator[] (size_type n){ 
-            return *(begin()+n);
-        }
+        // const_reference operator[] (size_type n){ 
+        //     return *(begin()+n);
+        // }
 
         vector(): start(0),finish(0),end_of_storage(0) { }
         vector(size_type n, const T& val) { fill_initialize(n,val); }
         vector(size_type n) { fill_initialize(n, T()); }
         vector(const vector<T, Alloc>& x) {
-            start = allocate_and_copy(x.end()-x.begin(), x.begin(), x.end());
+            start = allocate_and_copy(x.begin(), x.end());
             finish = start + (x.end() - x.begin());
             end_of_storage = finish;
         }
@@ -73,7 +73,7 @@ class vector {
         vector(const_iterator first, const_iterator last) {
             size_type n = 0;
             distance(first, last, n);
-            start = allocate_and_copy(n, first, last);
+            start = allocate_and_copy(first, last);
             finish = start +n;
             end_of_storage = finish;
         }
@@ -86,9 +86,9 @@ class vector {
         vector<T, Alloc>& operator=(const vector<T, Alloc>& x);
 
         reference front() { return *begin();}
-        const_reference front() { return *begin();}
+        // const_reference front() { return *begin();}
         reference back() { return *(end()-1);}
-        const_reference back() { return *(end()-1);}
+        // const_reference back() { return *(end()-1);}
 
         void push_back(const T& x){ 
             if (finish != end_of_storage){ 
@@ -150,14 +150,15 @@ class vector {
     protected:
         iterator allocate_and_fill(size_type n, const T& x) { 
             iterator result = data_allocator::allocate(n);
-            uninitialized_fill_n(result, n, x);
+            gadget::uninitialized_fill_n(result, n, x);
             return result;
         }
 
-        iterator allocate_and_copy(iterator first, iterator last) { 
+        iterator allocate_and_copy(const_iterator first, const_iterator last) { 
             start = data_allocator::allocate(last - first);
-            finish = uninitialized_copy(first, last, start);
+            finish = gadget::uninitialized_copy(first, last, start);
             end_of_storage = finish;
+            return start;
         }
 };
 
@@ -170,7 +171,7 @@ template <class T, class Alloc>
 vector<T, Alloc>& vector<T, Alloc>::operator=(const vector<T, Alloc>& x) {
     if(&x != this) {
         if(x.size() > capacity()) {
-            iterator tmp = allocate_and_copy(x.end() - x.begin(),x.begin(), x.end());
+            iterator tmp = allocate_and_copy(x.begin(), x.end());
             destroy(start, finish);
             deallocate();
             start = tmp;
@@ -197,7 +198,7 @@ void vector<T, Alloc>::insert_aux(iterator pos, const T& x){
         ++finish;
         T x_copy = x;
         copy_backward(pos, finish -2, finish-1);
-        *position = x_copy;
+        *pos = x_copy;
     }
     
     else {
@@ -231,7 +232,7 @@ void vector<T, Alloc>::insert(iterator pos, size_type n, const T& x) {
                 uninitialized_copy(finish-n, finish, finish);
                 finish += n;
                 copy_backward(pos, old_finish-n,old_finish);
-                fill(position, position+n,x_copy);
+                fill(pos, pos+n,x_copy);
             }
             else {
                 uninitialized_fill_n(finish, n-elems_after, x_copy);
@@ -240,25 +241,26 @@ void vector<T, Alloc>::insert(iterator pos, size_type n, const T& x) {
                 finish += elems_after;
                 fill(pos,old_finish, x_copy);
             }
-            else {
-                const size_type old_size = size();
-                const size_type len = old_size + max(old_size, n);
-                iterator new_start = data_allocator::allocate(len);
-                iterator new_finish = new_start;
+        }
+        else {
+            const size_type old_size = size();
+            const size_type len = old_size + max(old_size, n);
+            iterator new_start = data_allocator::allocate(len);
+            iterator new_finish = new_start;
 
-                new_finish = uninitialized_copy(start, pos, new_start);
-                new_finish = uninitialized_fill_n(new_finish, n, x);
-                new_finish = uninitialized_copy(pos, finish, new_finish);
+            new_finish = uninitialized_copy(start, pos, new_start);
+            new_finish = uninitialized_fill_n(new_finish, n, x);
+            new_finish = uninitialized_copy(pos, finish, new_finish);
 
-                destroy(start, finish);
-                deallocate();
-                start = new_start;
-                finish = new_finish;
-                end_of_storage = new_start + len;
-            }
+            destroy(start, finish);
+            deallocate();
+            start = new_start;
+            finish = new_finish;
+            end_of_storage = new_start + len;
         }
     }
 }
+
 
 template <class T,class Alloc>
 void vector<T, Alloc>::insert(iterator pos, const_iterator first, const_iterator last) {
@@ -277,7 +279,7 @@ void vector<T, Alloc>::insert(iterator pos, const_iterator first, const_iterator
             else {
                 uninitialized_copy(first+elem_after, last,finish);
                 finish += n-elem_after;
-                uninitialized_copy(position,old_finish,finish);
+                uninitialized_copy(pos,old_finish,finish);
                 finish += elem_after;
                 copy(first, first+elem_after,pos);
             }

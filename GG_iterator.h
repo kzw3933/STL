@@ -2,7 +2,7 @@
 #define __GG_ITERATOR_H
 
 #include <cstddef>                                          // for ptrdiff_t
-#include <GG_config.h>
+#include "GG_config.h"
 __GG_BEGIN_NAMESPACE
 
 /*

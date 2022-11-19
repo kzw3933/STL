@@ -5,35 +5,30 @@
 #include <string>
 #include <array>
 #include <cassert>
-#include <GG_test_utils.h>
-#include <../GG_config.h>
-#include <../GG_vector.h>
+
+#include "../GG_config.h"
+#include "../GG_vector.h"
 
 __GG_BEGIN_NAMESPACE
 
-namespace VectorTest {
-    template <class T>
-    using stdVec = std::vector<T>;
+namespace GGTest {
 
-    template<class T>
-    using tsVec = vector<T>;
+    void testVectorCase1();
+    void testVectorCase2();
+    void testVectorCase3();
+    void testVectorCase4();
+    void testVectorCase5();
+    void testVectorCase6();
+    void testVectorCase7();
+    void testVectorCase8();
+    void testVectorCase9();
+    void testVectorCase10();
+    void testVectorCase11();
+    void testVectorCase12();
+    void testVectorCase13();
+    void testVectorCase14();
 
-    void testCase1();
-    void testCase2();
-    void testCase3();
-    void testCase4();
-    void testCase5();
-    void testCase6();
-    void testCase7();
-    void testCase8();
-    void testCase9();
-    void testCase10();
-    void testCase11();
-    void testCase12();
-    void testCase13();
-    void testCase14();
-
-    void testAllCases();
+    void testVectorAllCases();
 }
 
 __GG_END_NAMESPACE

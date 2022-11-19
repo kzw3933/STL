@@ -2,11 +2,12 @@
 #define __GG_VECTOR_UTILS_H
 
 #include <string>
-#include <../GG_config.h>
+#include <iostream>
+#include "../GG_config.h"
 
 __GG_BEGIN_NAMESPACE
 
-namespace Test {
+namespace GGTest {
     template <class Container>
     void print_container(Container& container, const std::string& name = "") {
         std::cout << "Container " << name << " :";

@@ -2,8 +2,8 @@
 #define __GG_ALGOBASE_H
 
 #include <string.h>
-#include <GG_iterator.h>
-#include <GG_config.h>
+#include "GG_iterator.h"
+#include "GG_config.h"
 __GG_BEGIN_NAMESPACE
 
 /*

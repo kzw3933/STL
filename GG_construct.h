@@ -25,31 +25,16 @@ inline void construct(T1* ptr, const T2& val){
 **
 */
 
-
-// 如果元素型别(value type) 有trivial destructor
-template <class ForwardIterator>
-inline void
-__destroy_aux(ForwardIterator first, ForwardIterator last, __true_type){}
-
-
-// 判断元素的数值类型(value type)是否有trivial destructor
-template <class ForwardIterator, class T>
-inline void __destroy(ForwardIterator first, ForwardIterator last,T*){
-    typedef typename __type_traits<T>::has_trivial_destructor trivial_destructor;
-    __destroy_aux(first, last, trivial_destructor());
-}
-
 // destroy第一个版本: 接受一个指针
 template < class T>
 inline void destroy(T* ptr) {
     ptr->~T();
 }
 
-// destroy第二个版本: 接受两个迭代器
+// 如果元素型别(value type) 有trivial destructor
 template <class ForwardIterator>
-inline void destroy(ForwardIterator first, ForwardIterator last) {
-    __destroy(first,last, value_type(first));
-}
+inline void
+__destroy_aux(ForwardIterator first, ForwardIterator last, __true_type){}
 
 // 如果元素型别(value type) 有non-trivial destructor
 template <class ForwardIterator>
@@ -59,6 +44,18 @@ __destroy_aux(ForwardIterator first, ForwardIterator last, __false_type){
         destroy(&*first);
 }
 
+// 判断元素的数值类型(value type)是否有trivial destructor
+template <class ForwardIterator, class T>
+inline void __destroy(ForwardIterator first, ForwardIterator last,T*){
+    typedef typename __type_traits<T>::has_trivial_destructor trivial_destructor;
+    __destroy_aux(first, last, trivial_destructor());
+}
+
+// destroy第二个版本: 接受两个迭代器
+template <class ForwardIterator>
+inline void destroy(ForwardIterator first, ForwardIterator last) {
+    __destroy(first,last, value_type(first));
+}
 
 // destroy第二个版本对迭代器为char* 和wchar_t*的特化版本
 inline void destroy(char*, char*) {}

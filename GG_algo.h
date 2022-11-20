@@ -524,27 +524,6 @@ OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator l
     return result;
 }
 
-/*
-**   rotate: 旋转
-**
-*/
-
-/*
-**   rotate_copy: 旋转,并将结果复制到另一个容器  
-**
-*/
-
-
-/*
-**   search: 查找某个子序列
-**
-*/
-
-/*
-**   search_n: 查找连续发生n次的子序列
-**
-*/
-
 
 
 

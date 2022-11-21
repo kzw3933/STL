@@ -122,10 +122,21 @@ class list {
             node->prev = node;
         }
 
+        // 将[first, last) 内的所有元素移动到pos之前
+        void transfer(iterator pos, iterator first, iterator last) {
+            if (pos != last) {
+                (last.node->prev)->next = pos.node;
+                (first.node->prev)->next = last.node;
+                (pos.node->prev)->next = first.node;
+                link_type tmp = pos.node->prev;
+                pos.node->prev= last.node->prev;
+                last.node->prev = first.node->prev;
+                first.node->prev = tmp; 
+            }
+        }
+
     public:
         list() { empty_initialize(); }
-
-
 
     protected:
         link_type   node;
@@ -176,8 +187,32 @@ class list {
         }
         void remove(const T& val);
         void clear();
+        void unique();
 
-    
+    public:
+        // 将 x 接合于 pos 所指位置之前,x必须不同于 *this
+        void splice(iterator pos, list& x) {
+            if (!x.empty())
+                transfer(pos, x.begin(), x.end());
+        }
+
+        // 将 i 所指元素接合于pos所指位置之前 pos 和 i 可以指向同一个list
+        void splice(iterator pos, list&, iterator i) {
+            iterator j = i;
+            ++j;
+            if (pos == i || pos == j)
+                return ;
+            transfer(pos,i,j);
+        }
+
+        // 将 [first, last) 内所有的元素接合于pos所指位置之前, pos与 [first, last) 可指向同一个list,但pos不能在[first, last)中
+        void splice(iterator pos, list&, iterator first, iterator last) {
+            if (first != last)
+                transfer(pos, first, last);
+        }
+
+        void merge(list<T, Alloc>& x);
+        void reverse();    
 };
 
 
@@ -208,7 +243,57 @@ void list<T, Alloc>::remove(const T& val) {
     }
 }
 
+// 移除数值相同的连续元素至只有一个
+template<class T,class Alloc>
+void list<T, Alloc>::unique() {
+    iterator first = begin();
+    iterator last = end();
+    if (first == last ) return ;
+    iterator next = first;
+    while(++next != last) {
+        if (*first == *next)
+            erase(next);
+        else 
+            first = next;
+        next = first;
+    }
+}
 
+
+template<class T,class Alloc>
+void list<T,Alloc>::merge(list<T, Alloc>& x) {
+    iterator first1 = begin();
+    iterator last1 = end();
+    iterator first2 = x.begin();
+    iterator last2 = x.end();
+
+    // 前提要满足两个list已经递增排序
+    while(first1 != last1 && first2 != last2) {
+        if (*first2 < *first1) {
+            iterator next = first2;
+            transfer(first1, first2, ++next);
+            first2 = next;
+        }
+        else 
+            ++first1;
+        if (first2 != last2)
+            transfer(last1, first2, last2);
+    }
+}
+
+
+template <class T, class Alloc>
+void list<T, Alloc>::reverse() {
+    if (node->next == node || (node->next)->next == node)
+        return ;
+    iterator first = begin();
+    ++first;
+    while(first != end()) {
+        iterator old = first;
+        ++first;
+        transfer(begin(), old, first);
+    }
+}
 
 __GG_END_NAMESPACE
 #endif

@@ -2,6 +2,7 @@
 #define __GG_ALLOC_H
 
 #include <cstddef>
+#include <stdlib.h>
 #include "GG_config.h"
 
 __GG_BEGIN_NAMESPACE

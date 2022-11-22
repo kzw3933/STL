@@ -11,8 +11,6 @@ class pair {
 };
 
 
-
-
 __GG_END_NAMESPACE
 
 #endif

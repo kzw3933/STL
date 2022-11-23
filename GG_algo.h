@@ -524,6 +524,10 @@ OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator l
     return result;
 }
 
+
+template <class ForwardIterator>
+ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, typename iterator_traits<ForwardIterator>::value_type val);
+
 __GG_END_NAMESPACE
 
 #endif

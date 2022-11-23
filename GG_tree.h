@@ -116,12 +116,6 @@ struct __rb_tree_iterator: public __rb_tree_base_iterator {
 
 template <class Key, class Value, class KeyOfValue, class Compare, class Alloc=alloc>
 class rb_tree {
-    protected:
-        typedef void*   void_pointer;
-        typedef __rb_tree_node_base*    base_ptr;
-        typedef __rb_tree_node<Value>   rb_tree_node;
-        typedef allocator<rb_tree_node, Alloc>  rb_tree_node_allocator;
-        typedef __rb_tree_color_type    color_type;
 
     public:
         typedef Key     key_type;
@@ -133,6 +127,42 @@ class rb_tree {
         typedef const rb_tree_node* link_type;
         typedef size_t  size_type;
         typedef ptrdiff_t   difference_type;
+
+        typedef __rb_tree_iterator<value_type, reference, pointer> iterator;
+
+    protected:
+        typedef void*   void_pointer;
+        typedef __rb_tree_node_base*    base_ptr;
+        typedef __rb_tree_node<Value>   rb_tree_node;
+        typedef allocator<rb_tree_node, Alloc>  rb_tree_node_allocator;
+        typedef __rb_tree_color_type    color_type;
+
+    public:
+        rb_tree(const Compare& comp = Compare()): node_count(0), key_compare(comp) { init(); }
+        
+
+        rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& operate=(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& x);
+
+        ~rb_tree() {
+            clear();
+            put_node(header);
+        }
+
+    public:
+        Compare key_comp() const { return key_compare; }
+        iterator begin() { return leftmost(); }
+        iterator end() { return header; }
+        bool empty() const { return node_count == 0; }
+        size_type size() const { return node_count; }
+        size_type max_size() const { return size_type(-1); }
+
+        //!TODO: pair的实现
+        pair<iterator, bool>insert_unique(const value_type& x);
+        iterator insert_equal(const value_type& x);
+
+        iterator find(const Key& x);
+
+    
 
     protected:
         link_type   get_node() {
@@ -160,11 +190,7 @@ class rb_tree {
             destroy(&p->value_field);
             put_node(p);
         }
-
-    protected:
-        size_type node_count;   // 追踪记录树的大小(节点数量)
-        link_type header;       // 实现上的一个技巧
-        Compare key_compare;
+        
 
         link_type&  root() const {
             return (link_type&) header->parent;
@@ -210,9 +236,8 @@ class rb_tree {
 
         static link_type maximum(link_type x) {
             return (link_type) __rb_tree_node_base::maximum(x);
-        } 
-    public:
-        typedef __rb_tree_iterator<value_type, reference, pointer> iterator;
+        }  
+    
 
     private:
         iterator __insert(base_ptr x, base_ptr y, const value_type& v);
@@ -226,31 +251,6 @@ class rb_tree {
             rightmost() = header;  
         }
 
-    public:
-        rb_tree(const Compare& comp = Compare()): node_count(0), key_compare(comp) { init(); }
-        ~rb_tree() {
-            clear();
-            put_node(header);
-        }
-
-        rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& operate=(const rb_tree<Key, Value, KeyOfValue, Compare, Alloc>& x);
-    
-    public:
-        Compare key_comp() const { return key_compare; }
-        iterator begin() { return leftmost(); }
-        iterator end() { return header; }
-        bool empty() const { return node_count == 0; }
-        size_type size() const { return node_count; }
-        size_type max_size() const { return size_type(-1); }
-
-    public:
-        //!TODO: pair的实现
-        pair<iterator, bool>insert_unique(const value_type& x);
-        iterator insert_equal(const value_type& x);
-
-        iterator find(const Key& x);
-
-    private:
         inline void __rb_tree_rotate_left(__rb_tree_node_base* x, __rb_tree_node_base*& root) {
             __rb_tree_node_base* y = x->right;
             x->right = y->left;
@@ -325,6 +325,11 @@ class rb_tree {
             }
             root->color = __rb_tree_black;
         }
+
+    protected:
+        size_type node_count;   // 追踪记录树的大小(节点数量)
+        link_type header;       // 实现上的一个技巧
+        Compare key_compare; 
 
 };
 
@@ -416,7 +421,7 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const Key& k) {
     }
     iterator j = iterator(y);
 
-    return (j == end()) || key_compare(k, key(j.node)) ? end() : j;
+    return (j == end() || key_compare(k, key(j.node))) ? end() : j;  
 }
 
 

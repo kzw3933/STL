@@ -148,5 +148,200 @@ inline void distance(InputIterator first, InputIterator last, Distance& n ){
 	__distance(first, last, n, iterator_category(first));
 }
 
+
+
+/*
+** 	reverse_iterator
+**
+*/
+
+
+template <class Iterator>
+class reverse_iterator {
+	public:
+		typedef Iterator	iterator_type;
+		typedef typename iterator_traits<iterator>::iterator_category	iterator_category;
+		typedef typename iterator_traits<iterator>::value_type	value_type;
+		typedef typename iterator_traits<iterator>::difference_type	difference_type;
+		typedef typename iterator_traits<iterator>::pointer	pointer;
+		typedef const pointer	const_pointer;
+		typedef typename iterator_traits<iterator>::reference	reference;
+
+
+	public:
+		reverse_iterator() : __base(0), __cur(0) {}
+		explicit reverse_iterator(const iterator_type& iter): __base(iter) {
+			auto temp = iter;
+			__cur = --iter;
+		}
+
+		template <class Iter>
+		reverse_iterator(const reverse_iterator<Iter>& rev_iter) {
+			__base = (iterator_type)rev_iter.base();
+			auto temp = __base;
+			__cur = --temp;
+		}
+
+	public:
+		iterator_type base() { return __base; }
+
+
+
+	public:
+		reference operator*() { return (*cur_); }
+		pointer operator->() { return &(operator*());}
+		reverse_iterator& operator++() {
+			-- __base;
+			-- __cur;
+			return *this;
+		}
+
+		reverse_iterator& operator++(int) {
+			reverse_iterator temp = *this;
+			++(*this);
+			return temp;
+		}
+		reverse_iterator& operator--() {
+			++ __base;
+			++ __cur;
+			return *this;
+		}
+
+		reverse_iterator& operator--(int) {
+			reverse_iterator temp = *this;
+			--(*this);
+			return temp;
+		}
+
+		reference operator[](difference_type n) {
+			return base()[-n-1];
+		}
+
+		reverse_iterator operator+(difference_type n) const;
+		reverse_iterator& operator+=(difference_type n);
+		reverse_iterator operator-(difference_type n) const;
+		reverse_iterator& operator-=(difference_type n);
+
+	private:
+		Iterator advance_n_step(Iterator iter, difference_type n, bool right, random_access_iterator_tag) {
+			if (right)
+				iter += n;
+			else 
+				iter -= n;
+			return iter;
+		}
+
+		Iterator advance_n_step(Iterator iter, difference_type n, bool right, bidirectional_iterator_tag) {
+			difference_type absn = (n>=0) ? n : -n;
+			if ((right && n>0) || (!right && n < 0)) {
+				for(int i=0; i < absn; ++i) 
+					iter++;
+			}
+			else if((!right && n>0) || (right && n < 0)) {
+				for(int i=0; i<absn; i++) 
+					iter--;
+			}
+
+			return iter;
+		}
+
+	public:
+		template<class Iterator>
+		friend bool operator == (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+		template<class Iterator>
+		friend bool operator != (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+		template<class Iterator>
+		friend bool operator < (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+		template<class Iterator>
+		friend bool operator <= (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+		template<class Iterator>
+		friend bool operator > (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+		template<class Iterator>
+		friend bool operator >= (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+		
+		template<class Iterator>
+		friend reverse_iterator<Iterator> operator+(typename reverse_iterator<Iterator>::difference_type n, const reverse_iterator<Iterator>& rev_iter) ;
+		template<class Iterator>
+		friend typename reverse_iterator<Iterator>::difference_type operator-(const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) ;
+
+	private:
+		Iterator 	__base;
+		Iterator	__cur;
+
+};
+
+
+template<class Iterator>
+reverse_iterator<Iterator>& reverse_iterator<Iterator>::operator+=(difference_type n) {
+	__base = advance_n_step(__base, n, false, iterator_category());
+	__cur = advance_n_step(__cur, n, false, iterator_category());
+
+	return *this;
+}
+
+template<class Iterator>
+reverse_iterator<Iterator>& reverse_iterator<Iterator>::operator-=(difference_type n) {
+	__base = advance_n_step(__base, n, true, iterator_category());
+	__cur = advance_n_step(__cur, n, true, iterator_category());
+
+	return *this;
+}
+
+template<class Iterator>
+reverse_iterator<Iterator> reverse_iterator<Iterator>::operator+(difference_type n) const {
+	reverse_iterator<Iterator> result = *this;
+	result += n;
+	return result;
+}
+
+template<class Iterator>
+reverse_iterator<Iterator> reverse_iterator<Iterator>::operator-(difference_type n) const {
+	reverse_iterator<Iterator> result = *this;
+	result -= n;
+	return result;
+}
+
+template<class Iterator>
+bool operator == (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return lhs.__cur == rhs.__cur;
+}
+
+template<class Iterator>
+bool operator != (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return !(lhs == rhs);
+}
+
+template<class Iterator>
+bool operator < (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return lhs.__cur < rhs.__cur;
+}
+		
+template<class Iterator>
+bool operator <= (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return !(lhs.__cur > rhs.__cur);
+}
+		
+template<class Iterator>
+bool operator > (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return lhs.__cur > rhs.__cur;
+}
+		
+template<class Iterator>
+bool operator >= (const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return !(lhs.__cur < rhs.__cur);
+}
+		
+template<class Iterator>
+reverse_iterator<Iterator> operator+(typename reverse_iterator<Iterator>::difference_type n, const reverse_iterator<Iterator>& rev_iter) {
+	return rev_iter + n;
+}
+		
+template<class Iterator>
+typename reverse_iterator<Iterator>::difference_type operator-(const reverse_iterator<Iterator>& lhs, const reverse_iterator<Iterator>& rhs) {
+	return lhs.__cur - rhs.__cur;
+}
+
+
+
 __GG_END_NAMESPACE
 #endif

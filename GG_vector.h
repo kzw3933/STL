@@ -20,6 +20,8 @@ class vector {
         typedef const T*        const_pointer;
         typedef T*              iterator;
         typedef const T*        const_iterator;
+        typedef reverse_iterator<T*> reverse_iterator;
+        typedef reverse_iterator<const T*> const_reverse_iterator;
         typedef T&              reference;
         typedef const T&        const_reference;
         typedef size_t          size_type;
@@ -27,40 +29,8 @@ class vector {
 
     protected:
         typedef allocator<value_type, Alloc>  data_allocator;
-        iterator    start;
-        iterator    finish;
-        iterator    end_of_storage;
-
-        void insert_aux(iterator pos, const T& x);
-
-        void deallocate() { 
-            if(start) { 
-                data_allocator::deallocate(start, end_of_storage-start);
-            }
-        }
-
-        void fill_initialize(size_type n, const T& val) { 
-            start = allocate_and_fill(n, val);
-            finish = start + n;
-            end_of_storage = finish;
-        }
 
     public:
-       
-        iterator begin() {  return start;}
-        // const_iterator begin() const { return start; }
-        iterator end() { return finish; }
-        // const_iterator end() { return finish; }
-        size_type size() const {  return size_type(end()-begin());}
-        size_type capacity() const {  return size_type(end_of_storage - begin()); }
-        bool empty() const {  return begin() == end(); }
-        reference operator[] (size_type n){ 
-            return *(begin()+n);
-        } 
-        // const_reference operator[] (size_type n){ 
-        //     return *(begin()+n);
-        // }
-
         vector(): start(0),finish(0),end_of_storage(0) { }
         vector(size_type n, const T& val) { fill_initialize(n,val); }
         vector(size_type n) { fill_initialize(n, T()); }
@@ -82,13 +52,20 @@ class vector {
             destroy(start,finish);
             deallocate();
         } 
-
-        vector<T, Alloc>& operator=(const vector<T, Alloc>& x);
+    
+    public:
+        iterator begin() {  return start;}
+        const_iterator cbegin() const { return start; }
+        iterator end() { return finish; }
+        const_iterator cend() { return finish; }
+        reverse_iterator rbegin() { return reverse_iterator(finish); }
+        reverse_iterator rend() { return reverse_iterator(start); }
+        size_type size() const {  return size_type(end()-begin());}
+        size_type capacity() const {  return size_type(end_of_storage - begin()); }
+        bool empty() const {  return begin() == end(); }
 
         reference front() { return *begin();}
-        // const_reference front() { return *begin();}
         reference back() { return *(end()-1);}
-        // const_reference back() { return *(end()-1);}
 
         void push_back(const T& x){ 
             if (finish != end_of_storage){ 
@@ -146,8 +123,27 @@ class vector {
 
         void resize(size_type new_sz) { resize(new_sz, T()); }
         void clear() {  erase(begin(), end()); }
+        void reserve(size_type n);
+        void shrink_to_fit();
+
+    public:
+        reference operator[] (size_type n){ 
+            return *(begin()+n);
+        } 
+
+        vector<T, Alloc>& operator=(const vector<T, Alloc>& x);
+
+        bool operator==(const vector& v) const;
+        bool operator!=(const vector& v) const;  
+
+    public:
+        template<class T, class Alloc>
+        friend bool operator==(const vector<T,Alloc>& v1, const vector<T,Alloc>& v2);
+        template<class T, class Alloc>
+        friend bool operator!=(const vector<T,Alloc>& v1, const vector<T,Alloc>& v2);
 
     protected:
+
         iterator allocate_and_fill(size_type n, const T& x) { 
             iterator result = data_allocator::allocate(n);
             gadget::uninitialized_fill_n(result, n, x);
@@ -160,6 +156,27 @@ class vector {
             end_of_storage = finish;
             return start;
         }
+
+        void insert_aux(iterator pos, const T& x);
+
+        void deallocate() { 
+            if(start) { 
+                data_allocator::deallocate(start, end_of_storage-start);
+            }
+        }
+
+        void fill_initialize(size_type n, const T& val) { 
+            start = allocate_and_fill(n, val);
+            finish = start + n;
+            end_of_storage = finish;
+        }
+
+    protected: 
+        iterator    start;
+        iterator    finish;
+        iterator    end_of_storage;
+
+            
 };
 
 template <class T, class Alloc>
@@ -219,8 +236,6 @@ void vector<T, Alloc>::insert_aux(iterator pos, const T& x){
     }
 }
 
-
-//!TODO: has bugs ?
 template <class T, class Alloc>
 void vector<T, Alloc>::insert(iterator pos, size_type n, const T& x) {
     if (0 != n) {
@@ -301,6 +316,38 @@ void vector<T, Alloc>::insert(iterator pos, const_iterator first, const_iterator
             end_of_storage = new_start + len;
         }
     }
+}
+
+template <class T, class Alloc>
+bool operator==(const vector<T, Alloc>& v1, const vector<T, Alloc>& v2) {
+    return v1.operator==(v2);
+}
+
+template <class T, class Alloc>
+bool operator!=(const vector<T, Alloc>& v1, const vector<T, Alloc>& v2) {
+    return !(v1.operator==(v2));
+}
+
+template<class T, class Alloc>
+void vector<T, Alloc>::reserve(size_type n) {
+    if (n <= capacity())
+        return ;
+    T* new_start = data_allocator::allocate(n);
+    T* new_finish = uninitialized_copy(begin(), end(), new_start);
+    destroy(start, finish);
+    deallocate();
+    start = new_start;
+    finish = new_finish;
+    end_of_storage = start + n;
+}
+
+template<class T, class Alloc>
+void vector<T, Alloc>::shrink_to_fit() {
+    T* t = (T*)data_allocator::allocate(size());
+    finish = uninitialized_copy(start, finish, t);
+    deallocate(start, capacity());
+    start = t;
+    end_of_storage = finish;
 }
 
 __GG_END_NAMESPACE

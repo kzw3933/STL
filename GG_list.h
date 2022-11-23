@@ -83,10 +83,7 @@ inline ptrdiff_t* distance_type(const __list_iterator<T, Ref, Ptr>&) {
 
 template <class T, class Alloc=alloc>
 class list {
-    protected:
-        typedef void*   void_pointer;
-        typedef __list_node<T> list_node;
-        typedef allocator<list_node, Alloc> list_node_allocator;
+    
     public:
         typedef T               value_type;
         typedef T*              pointer;
@@ -97,49 +94,16 @@ class list {
         typedef size_t          size_type;
         typedef ptrdiff_t       difference_type;
 
-    public:
         typedef __list_iterator<T, T&, T*> iterator;
         typedef __list_iterator<T, const T&, const T*> const_iterator;
 
     protected:
-        link_type get_node() { return list_node_allocator::allocate(); }
-        void put_node(link_type node) { list_node_allocator::deallocate(node); }
-
-        link_type create_node(const T& val) {
-            link_type p = get_node();
-            construct(&(p->data), val);
-            return p;
-        }
-
-        void destroy_node(link_type p) {
-            destroy(&(p->data));
-            put_node(p);
-        }
-
-        void empty_initialize() {
-            node = get_node();
-            node->next = node;
-            node->prev = node;
-        }
-
-        // 将[first, last) 内的所有元素移动到pos之前
-        void transfer(iterator pos, iterator first, iterator last) {
-            if (pos != last) {
-                (last.node->prev)->next = pos.node;
-                (first.node->prev)->next = last.node;
-                (pos.node->prev)->next = first.node;
-                link_type tmp = pos.node->prev;
-                pos.node->prev= last.node->prev;
-                last.node->prev = first.node->prev;
-                first.node->prev = tmp; 
-            }
-        }
+        typedef void*   void_pointer;
+        typedef __list_node<T> list_node;
+        typedef allocator<list_node, Alloc> list_node_allocator;
 
     public:
         list() { empty_initialize(); }
-
-    protected:
-        link_type   node;
 
     public:
         iterator begin() { return (link_type)((*node).next);}
@@ -189,7 +153,6 @@ class list {
         void clear();
         void unique();
 
-    public:
         // 将 x 接合于 pos 所指位置之前,x必须不同于 *this
         void splice(iterator pos, list& x) {
             if (!x.empty())
@@ -213,6 +176,44 @@ class list {
 
         void merge(list<T, Alloc>& x);
         void reverse();    
+
+    protected:
+        link_type get_node() { return list_node_allocator::allocate(); }
+        void put_node(link_type node) { list_node_allocator::deallocate(node); }
+
+        link_type create_node(const T& val) {
+            link_type p = get_node();
+            construct(&(p->data), val);
+            return p;
+        }
+
+        void destroy_node(link_type p) {
+            destroy(&(p->data));
+            put_node(p);
+        }
+
+        void empty_initialize() {
+            node = get_node();
+            node->next = node;
+            node->prev = node;
+        }
+
+        // 将[first, last) 内的所有元素移动到pos之前
+        void transfer(iterator pos, iterator first, iterator last) {
+            if (pos != last) {
+                (last.node->prev)->next = pos.node;
+                (first.node->prev)->next = last.node;
+                (pos.node->prev)->next = first.node;
+                link_type tmp = pos.node->prev;
+                pos.node->prev= last.node->prev;
+                last.node->prev = first.node->prev;
+                first.node->prev = tmp; 
+            }
+        }
+
+
+    protected:
+        link_type   node;
 };
 
 

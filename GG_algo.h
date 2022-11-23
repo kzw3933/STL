@@ -524,9 +524,6 @@ OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator l
     return result;
 }
 
-
-
-
 __GG_END_NAMESPACE
 
 #endif

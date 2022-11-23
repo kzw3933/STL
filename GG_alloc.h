@@ -13,17 +13,23 @@ enum {__NFREELISTS = __MAX_BYTES/__ALIGN};  // free-lists个数
 enum {__NOBJS = 20};                        // refill时从内存池中索取的新节点数缺省值
 
 class alloc {
-    private:
-        // 将bytes上调至 __ALIGN 的倍数
-        static size_t ROUND_UP(size_t bytes) {
-            return (((bytes)+__ALIGN-1)& ~(__ALIGN -1));  
-        }
+
+    public:
+        static void* allocate(size_t bytes);
+        static void deallocate(void* ptr,size_t bytes);
+        static void* reallocate(void* ptr, size_t old_sz, size_t new_sz);
+        
     private:
         union obj {
             union obj* free_list_link;
             char client_data[1];
         };
+
     private:
+        // 将bytes上调至 __ALIGN 的倍数
+        static size_t ROUND_UP(size_t bytes) {
+            return (((bytes)+__ALIGN-1)& ~(__ALIGN -1));  
+        }
         static obj* free_lists[__NFREELISTS];
         static size_t FREELIST_INDEX(size_t bytes){
             return (((bytes)+__ALIGN-1)/__ALIGN -1);
@@ -36,10 +42,6 @@ class alloc {
         static char* end_free;
         static size_t heap_size;
 
-    public:
-        static void* allocate(size_t bytes);
-        static void deallocate(void* ptr,size_t bytes);
-        static void* reallocate(void* ptr, size_t old_sz, size_t new_sz);
 };
 
 

@@ -5,6 +5,7 @@
 #include "GG_iterator.h"
 #include "GG_config.h"
 #include "GG_pair.h"
+#include "GG_type_traits.h"
 
 __GG_BEGIN_NAMESPACE
 

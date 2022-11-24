@@ -197,6 +197,8 @@ void hashtable<Value, Key, HashFunc, ExtractKey, EqualKey, Alloc>::clear() {
     num_elements = 0;
 }
 
+
+//!TODO: has memory leak?
 template <class Value, class Key, class HashFunc, class ExtractKey, class EqualKey, class Alloc>
 void hashtable<Value, Key, HashFunc, ExtractKey, EqualKey, Alloc>::copy_from(const hashtable& ht) {
     buckets.clear();

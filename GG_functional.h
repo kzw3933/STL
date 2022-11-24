@@ -7,17 +7,16 @@ __GG_BEGIN_NAMESPACE
 
 
 
+template <class Key>
+class less {
 
 
+};
 
+template <class T>
+class identity {
 
-
-
-
-
-
-
-
+};
 
 
 

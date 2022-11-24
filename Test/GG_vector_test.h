@@ -25,8 +25,6 @@ namespace GGTest {
     void testVectorCase10();
     void testVectorCase11();
     void testVectorCase12();
-    void testVectorCase13();
-    void testVectorCase14();
 
     void testVectorAllCases();
 }

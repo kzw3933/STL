@@ -102,15 +102,6 @@ InputIterator find_if(InputIterator first, InputIterator last, Predicate pred) {
 **
 */
 
-template <class ForwardIterator1, class ForwardIterator2>
-inline ForwardIterator1 find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2) {
-    typedef typename iterator_traits<ForwardIterator1>::iterator_category category1;
-    typedef typename iterator_traits<ForwardIterator2>::iterator_category category2;
-
-    return __find_end(first1, last1, first2, last2, category1(), category2());
-}
-
-
 //!TODO: search的完成
 template <class ForwardIterator1, class ForwardIterator2>
 inline ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, forward_iterator_tag, forward_iterator_tag) {
@@ -151,6 +142,14 @@ inline BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, Bidirect
         advance(result, -distance(first2,last2));
         return result;
     }   
+}
+
+template <class ForwardIterator1, class ForwardIterator2>
+inline ForwardIterator1 find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2) {
+    typedef typename iterator_traits<ForwardIterator1>::iterator_category category1;
+    typedef typename iterator_traits<ForwardIterator2>::iterator_category category2;
+
+    return __find_end(first1, last1, first2, last2, category1(), category2());
 }
 
 /*

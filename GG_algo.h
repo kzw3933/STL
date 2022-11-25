@@ -524,9 +524,145 @@ OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator l
 }
 
 
-template <class ForwardIterator>
-ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, typename iterator_traits<ForwardIterator>::value_type val);
+/*
+** lower_bound: 将指定元素插入区间之内而不影响区间原本排序的最低位置
+**
+*/
 
-__GG_END_NAMESPACE
+template <class ForwardIterator, class T, class Distance>
+ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& val, Distance*, forward_iterator_tag) {
+    Distance len = 0;
+    distance(first, last, len);
+    Distance half;
+    ForwardIterator middle;
+
+    while(len >0) {
+        half = len >> 1;
+        middle = first;
+        advance(middle, half);
+        if(*middle < val) {
+            first = middle;
+            ++first;
+            len = len - half -1;
+        }
+        else 
+            len = half;
+    }
+    return first;
+}
+
+template <class RandomAccessIterator, class T, class Distance>
+RandomAccessIterator __lower_bound(RandomAccessIterator first, RandomAccessIterator last, const T& val, Distance*, random_access_iterator_tag) {
+    Distance len = last - first;
+    Distance half;
+    RandomAccessIterator middle;
+
+    while(len >0 ) {
+        half = len >> 1;
+        middle = first + half;
+        if(*middle < val) {
+            first = middle +1;
+            len = len -half - 1;
+        }
+        else 
+            len = half;
+    }
+    return first;
+}
+
+
+
+template<class ForwardIterator, class T>
+inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& val) {
+    return __lower_bound(first, last, val, distance_type(first), iterator_category(first));
+}
+
+template<class ForwardIterator, class T, class Compare>
+inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& val, Compare comp) {
+    return __lower_bound(first, last, val, comp, distance_type(first), iterator_category(first));
+}
+
+
+/*
+** upper_bound: 将指定元素插入区间之内而不影响区间原本排序的最低位置
+**
+*/
+
+template <class ForwardIterator, class T, class Distance>
+ForwardIterator __upper_bound(ForwardIterator first, ForwardIterator last, const T& val, Distance*, forward_iterator_tag) {
+    Distance len = 0;
+    distance(first, last, len);
+    Distance half;
+    ForwardIterator middle;
+
+    while(len >0) {
+        half = len >> 1;
+        middle = first;
+        advance(middle, half);
+        if( val < *middle) {
+            len = half;
+        }
+        else {
+            first = middle;
+            ++first;
+            len = len - half -1;
+        }       
+    }
+    return first;
+}
+
+template <class RandomAccessIterator, class T, class Distance>
+RandomAccessIterator __upper_bound(RandomAccessIterator first, RandomAccessIterator last, const T& val, Distance*, random_access_iterator_tag) {
+    Distance len = last - first;
+    Distance half;
+    RandomAccessIterator middle;
+
+    while(len >0 ) {
+        half = len >> 1;
+        middle = first + half;
+        if( val < *middle) 
+            len = half;
+        else {
+            first = middle +1;
+            len = len -half - 1;
+        }   
+    }
+    return first;
+}
+
+
+
+template<class ForwardIterator, class T>
+inline ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& val) {
+    return __upper_bound(first, last, val, distance_type(first), iterator_category(first));
+}
+
+template<class ForwardIterator, class T, class Compare>
+inline ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& val, Compare comp) {
+    return __upper_bound(first, last, val, comp, distance_type(first), iterator_category(first));
+}
+
+
+/*
+**  binary_search: 二分查找
+**
+*/
+
+template <class ForwardIterator, class T>
+bool binary_search(ForwardIterator first, ForwardIterator last, const T& val) {
+    ForwardIterator i = lower_bound(first, last, val);
+
+    return i != last && !(val < *i);
+}
+
+template <class ForwardIterator, class T, class Compare>
+bool binary_search(ForwardIterator first, ForwardIterator last, const T& val, Compare comp) {
+    ForwardIterator i = lower_bound(first, last, val, comp);
+
+    return i != last && !comp(val < *i);
+}
+
+
+__GG_END_NAMESPACE 
 
 #endif
